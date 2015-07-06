@@ -9,6 +9,7 @@ LOCAL_SRC_FILES:=                 \
     AHierarchicalStateMachine.cpp \
     ALooper.cpp                   \
     ALooperRoster.cpp             \
+    XMessage.cpp                  \
     AMessage.cpp                  \
     AString.cpp                   \
     base64.cpp                    \
