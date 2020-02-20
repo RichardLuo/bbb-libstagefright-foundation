@@ -65,6 +65,11 @@ void XMessage::freeItem(Item *item) {
             delete[] item->u.int32ArrayValue;
             break;
         }
+        case kTypeStdString:
+        {
+            delete item->u.stdStringValue;
+            break;
+        }
         case kTypeObject:
         case kTypeMessage:
         {
@@ -151,6 +156,12 @@ void XMessage::setString(
     item->u.stringValue = new AString(s, len < 0 ? strlen(s) : len);
 }
 
+void XMessage::setStdString(const char *name, const std::string &value) {
+    Item *item = allocateItem(name);
+    item->mType = kTypeStdString;
+    item->u.stdStringValue = new std::string(value);
+}
+
 void XMessage::setStdVector(const char *name, const std::vector<int32_t> &vec) {
     Item *item = allocateItem(name);
     item->mType = kTypeStdVector;
@@ -210,6 +221,15 @@ bool XMessage::findString(const char *name, AString *value) const {
     const Item *item = findItem(name, kTypeString);
     if (item) {
         *value = *item->u.stringValue;
+        return true;
+    }
+    return false;
+}
+
+bool XMessage::findStdString(const char *name, std::string *value) const {
+    const Item *item = findItem(name, kTypeStdString);
+    if (item) {
+        *value = *item->u.stdStringValue;
         return true;
     }
     return false;
@@ -485,6 +505,12 @@ sp<XMessage> XMessage::fromParcel(const Parcel &parcel) {
                 break;
             }
 
+            case kTypeStdString:
+            {
+                item->u.stdStringValue = new std::string(parcel.readCString());
+                break;
+            }
+
             case kTypeStdVector:
             {
                 const int sz = parcel.readInt32();
@@ -576,6 +602,11 @@ void XMessage::writeToParcel(Parcel *parcel) const {
                 for (int i = 0; i < sz; i++) {
                     parcel->writeInt32(item.u.int32ArrayValue[i+1]);
                 }
+                break;
+            }
+
+            case kTypeStdString: {
+                parcel->writeCString(item.u.stdStringValue->c_str());
                 break;
             }
 
